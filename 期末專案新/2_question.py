@@ -19,12 +19,18 @@ class Quiz:
 	# functionalities available
 	def __init__(self):
 		self.result = False
+  		# no of questions
+		self.data_size=len(question)
+  		# keep a counter of correct answers
+		self.correct=0
 		self.need_more_line = [False, False, False, False]
 		self.y_pos = 70		
 		self.list_A = []
 		self.list_B = []
 		self.list_C = []
 		self.list_D = []
+		self.label_list = []
+		self.q_list = []
 		# set question number to 0
 		self.q_no=0
 		
@@ -47,17 +53,28 @@ class Quiz:
 		# displays the button for next and exit.
 		self.buttons()
 		
-		# no of questions
-		self.data_size=len(question)
-		# keep a counter of correct answers
-		self.correct=0
 
 
+
+	def reset_variable(self):
+		self.y_pos = 70
+		self.need_more_line = [False, False, False, False]
+		self.list_A = []
+		self.list_B = []
+		self.list_C = []
+		self.list_D = []
+		for x in self.label_list:
+			x.destroy()
+		for x in self.q_list:
+			x.destroy()
+		self.label_list = []
+		self.q_list = []
+  
+	
 	# This method is used to display the result
 	# It counts the number of correct and wrong answers
 	# and then display them at the end as a message Box
 	def display_result(self):
-		
 		# calculates the wrong count
 		wrong_count = self.data_size - self.correct
 		correct = f"Correct: {self.correct}"
@@ -111,11 +128,12 @@ class Quiz:
 			# destroys the GUI
 			gui.destroy()
 		else:
-			# shows the next question
-			self.y_pos = 70
+			self.reset_variable()
 			self.display_question()
+			self.opt_selected=IntVar()
+			self.check_line()
+			self.opts=self.radio_buttons()
 			self.display_options()
-
 
 	# This method shows the two buttons on the screen.
 	# The first one is the next_button which moves to next question
@@ -139,7 +157,7 @@ class Quiz:
 		width=5,bg="black", fg="white",font=("ariel",16," bold"))
 		
 		# placing the Quit button on the screen
-		quit_button.place(x=700,y=50)
+		quit_button.place(x=700,y=450)
 					
 
 	# This method deselect the radio button on the screen
@@ -171,7 +189,6 @@ class Quiz:
 		if len(D) > 1:
 			self.need_more_line[3] = True
 			self.add_line(D, self.list_D)
-		print(self.need_more_line)
   
 	def display_options(self):
 		val=0
@@ -182,39 +199,28 @@ class Quiz:
 		# looping over the options to be displayed for the
 		# text of the radio buttons.
 		# for a, b, c, d in options_A[self.q_no], options_B[self.q_no], options_C[self.q_no], options_D[self.q_no]:
-		A = tw.wrap(options_A[self.q_no], width = 35)
-		B = tw.wrap(options_B[self.q_no], width = 35)
-		C = tw.wrap(options_C[self.q_no], width = 35)
-		D = tw.wrap(options_D[self.q_no], width = 35)
+		A = tw.wrap(options_A[self.q_no], width = 35, break_on_hyphens=False)
+		B = tw.wrap(options_B[self.q_no], width = 35, break_on_hyphens=False)
+		C = tw.wrap(options_C[self.q_no], width = 35, break_on_hyphens=False)
+		D = tw.wrap(options_D[self.q_no], width = 35, break_on_hyphens=False)
 		self.opts[val]['text']= A[0]
-
 		self.opts[val+1]['text']= B[0]
-
 		self.opts[val+2]['text']= C[0]
-
 		self.opts[val+3]['text']= D[0]
 			
 
 
 	# This method shows the current Question on the screen
 	def display_question(self):
-		
+  
 		# setting the Question properties
-		q = tw.wrap(question[self.q_no], width = 33)
+		q = tw.wrap(question[self.q_no], width = 33, break_on_hyphens=False)
 		for temp_text in q:
 			q_no = Label(gui, text=temp_text, font=( 'ariel' ,14, 'bold' ))
 			#placing the option on the screen
+			self.label_list.append(q_no)
 			q_no.place(x=60, y=self.y_pos)
 			self.y_pos += 25
-		
-
-		#q_no.grid(row=0, column=0)
-
-		# Check if the label exceeds the width of the window
-		#if q_no.winfo_width() > gui.winfo_width():
-			# Move the label to the next row
-			#q_no.grid_forget()
-			#q_no.grid(row=1, column=0)
 		#placing the option on the screen
 		
 
@@ -236,51 +242,52 @@ class Quiz:
 	# them.
 	def radio_buttons(self):
 		
-		# initialize the list with an empty list of options
-		q_list = []
-		
 		# position of the first option
 		self.y_pos += 25
 		temp = 0
 		# adding the options to the list
-		while len(q_list) < 4:
+		while len(self.q_list) < 4:
 			# setting the radio button properties
 			radio_btn = Radiobutton(gui,text=" ",variable=self.opt_selected,
-			value = len(q_list)+1,font = ("ariel",12))
+			value = len(self.q_list)+1,font = ("ariel",12))
 
 			# adding the button to the list
-			q_list.append(radio_btn)
+			self.q_list.append(radio_btn)
 			
 			# placing the button
 			radio_btn.place(x = 60, y = self.y_pos)
+   
 			if temp < 4:
 				if self.need_more_line[temp] == True:
 					if temp == 0:
 						for x in self.list_A:
 							option_ex = Label(gui, text = x, font = ("ariel",12))
-							self.y_pos += 20
+							self.label_list.append(option_ex)
+							self.y_pos += 22
 							option_ex.place(x = 80, y = self.y_pos)
-							print('A')
 					elif temp == 1:
 						for x in self.list_B:
 							option_ex = Label(gui, text = x, font = ("ariel",12))
-							self.y_pos += 20
+							self.label_list.append(option_ex)
+							self.y_pos += 22
 							option_ex.place(x = 100, y = self.y_pos)
 					elif temp == 2:
 						for x in self.list_C:
 							option_ex = Label(gui, text = x, font = ("ariel",12))
-							self.y_pos += 20
+							self.label_list.append(option_ex)
+							self.y_pos += 22
 							option_ex.place(x = 100, y = self.y_pos)
 					elif temp == 3:
 						for x in self.list_D:
 							option_ex = Label(gui, text = x, font = ("ariel",12))
-							self.y_pos += 20
+							self.label_list.append(option_ex)
+							self.y_pos += 22
 							option_ex.place(x = 100, y = self.y_pos)
 			# incrementing the y-axis position by 40
 			self.y_pos += 40
 			temp += 1
 		# return the radio buttons
-		return q_list
+		return self.q_list
 
 # Create a GUI Window
 gui = Tk()
@@ -296,20 +303,25 @@ gui.title("TEST")
 # get the data from the excel file
 data = pd.read_excel("data.xlsx")
 
-r = randint(0,197)
-data = data.loc[r]
 # set the question, options, and answer
+r = randint(0, 197)
+data = data.loc[r]
 
 question = [(data['question'])]
 options_A = [(data['A'])]
 options_B = [(data['B'])]
 options_C = [(data['C'])]
 options_D = [(data['D'])]
-# print(options_A)
-# print(options_B)
 
 answer = [(data[ 'answer'])]
 
+# question = (data['question'])
+# options_A = (data['A'])
+# options_B = (data['B'])
+# options_C = (data['C'])
+# options_D = (data['D'])
+
+# answer = (data['answer'])
 # create an object of the Quiz Class.
 quiz = Quiz()
 
