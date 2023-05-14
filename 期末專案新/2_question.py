@@ -8,8 +8,6 @@ import textwrap as tw
 # and import messagebox as mb from tkinter
 from tkinter import messagebox as mb
 
-#import json to use json file for data
-# import json
 import pandas as pd
 
 #class to define the components of the GUI
@@ -22,18 +20,17 @@ class Quiz:
 	def __init__(self):
 		self.result = False
 		self.need_more_line = [False, False, False, False]
+		self.y_pos = 70		
+		self.list_A = []
+		self.list_B = []
+		self.list_C = []
+		self.list_D = []
 		# set question number to 0
 		self.q_no=0
 		
 		# assigns ques to the display_question function to update later.
 		self.display_title()
 		self.display_question()
-  
-		self.list_A = []
-		self.list_B = []
-		self.list_C = []
-		self.list_D = []
-
 		
 		# opt_selected holds an integer value which is used for
 		# selected option in a question.
@@ -41,6 +38,7 @@ class Quiz:
 		
 		# displaying radio button for the current question and used to
 		# display options for the current question
+		self.check_line()
 		self.opts=self.radio_buttons()
 		
 		# display options for the current question
@@ -51,7 +49,6 @@ class Quiz:
 		
 		# no of questions
 		self.data_size=len(question)
-		
 		# keep a counter of correct answers
 		self.correct=0
 
@@ -115,6 +112,7 @@ class Quiz:
 			gui.destroy()
 		else:
 			# shows the next question
+			self.y_pos = 70
 			self.display_question()
 			self.display_options()
 
@@ -134,7 +132,7 @@ class Quiz:
 		width=10,bg="blue",fg="white",font=("ariel",16,"bold"))
 		
 		# placing the button on the screen
-		next_button.place(x=350,y=380)
+		next_button.place(x=350,y=450)
 		
 		# This is the second button which is used to Quit the GUI
 		quit_button = Button(gui, text="Quit", command=gui.destroy,
@@ -155,7 +153,26 @@ class Quiz:
 			list2.append(list1[i])
 			i-=1
 		list2.reverse()
-
+	
+	def check_line(self):
+		A = tw.wrap(options_A[self.q_no], width = 35)
+		B = tw.wrap(options_B[self.q_no], width = 35)
+		C = tw.wrap(options_C[self.q_no], width = 35)
+		D = tw.wrap(options_D[self.q_no], width = 35)
+		if len(A) > 1:
+			self.need_more_line[0] = True
+			self.add_line(A, self.list_A)
+		if len(B) > 1:
+			self.need_more_line[1] = True
+			self.add_line(B, self.list_B)
+		if len(C) > 1:
+			self.need_more_line[2] = True
+			self.add_line(C, self.list_C)
+		if len(D) > 1:
+			self.need_more_line[3] = True
+			self.add_line(D, self.list_D)
+		print(self.need_more_line)
+  
 	def display_options(self):
 		val=0
 		
@@ -170,23 +187,12 @@ class Quiz:
 		C = tw.wrap(options_C[self.q_no], width = 35)
 		D = tw.wrap(options_D[self.q_no], width = 35)
 		self.opts[val]['text']= A[0]
-		if len(A) > 1:
-			print('need more line')
-			self.need_more_line[0] = True
-			self.add_line(A, self.list_A)
-		print(self.list_A)
+
 		self.opts[val+1]['text']= B[0]
-		if len(B) > 1:
-			self.need_more_line[1] = True
-			self.add_line(B, self.list_B)
+
 		self.opts[val+2]['text']= C[0]
-		if len(C) > 1:
-			self.need_more_line[2] = True
-			self.add_line(C, self.list_C)
+
 		self.opts[val+3]['text']= D[0]
-		if len(D) > 1:
-			self.need_more_line[3] = True
-			self.add_line(D, self.list_D)
 			
 
 
@@ -194,13 +200,12 @@ class Quiz:
 	def display_question(self):
 		
 		# setting the Question properties
-		q = tw.wrap(question[self.q_no], width = 35)
-		y_pos = 70
+		q = tw.wrap(question[self.q_no], width = 33)
 		for temp_text in q:
-			q_no = Label(gui, text=temp_text, font=( 'ariel' ,12, 'bold' ))
+			q_no = Label(gui, text=temp_text, font=( 'ariel' ,14, 'bold' ))
 			#placing the option on the screen
-			q_no.place(x=60, y=y_pos)
-			y_pos += 20
+			q_no.place(x=60, y=self.y_pos)
+			self.y_pos += 25
 		
 
 		#q_no.grid(row=0, column=0)
@@ -235,49 +240,45 @@ class Quiz:
 		q_list = []
 		
 		# position of the first option
-		y_pos = 200
-		
+		self.y_pos += 25
+		temp = 0
 		# adding the options to the list
 		while len(q_list) < 4:
 			# setting the radio button properties
 			radio_btn = Radiobutton(gui,text=" ",variable=self.opt_selected,
-			value = len(q_list)+1,font = ("ariel",14))
+			value = len(q_list)+1,font = ("ariel",12))
 
 			# adding the button to the list
 			q_list.append(radio_btn)
 			
 			# placing the button
-			radio_btn.place(x = 100, y = y_pos)
-			temp = 0
-			for i in self.need_more_line:
-				print('Check')
-				if i == True:
-					print('Found')
+			radio_btn.place(x = 60, y = self.y_pos)
+			if temp < 4:
+				if self.need_more_line[temp] == True:
 					if temp == 0:
 						for x in self.list_A:
-							option_ex = Label(gui, text = x, font = ("ariel",14))
-							y_pos += 20
-							option_ex.place(x = 100, y = y_pos)
+							option_ex = Label(gui, text = x, font = ("ariel",12))
+							self.y_pos += 20
+							option_ex.place(x = 80, y = self.y_pos)
 							print('A')
-					if temp == 1:
+					elif temp == 1:
 						for x in self.list_B:
-							option_ex = Label(gui, text = x, font = ("ariel",14))
-							y_pos += 20
-							option_ex.place(x = 100, y = y_pos)
-					if temp == 2:
+							option_ex = Label(gui, text = x, font = ("ariel",12))
+							self.y_pos += 20
+							option_ex.place(x = 100, y = self.y_pos)
+					elif temp == 2:
 						for x in self.list_C:
-							option_ex = Label(gui, text = x, font = ("ariel",14))
-							y_pos += 20
-							option_ex.place(x = 100, y = y_pos)
-					if temp == 3:
+							option_ex = Label(gui, text = x, font = ("ariel",12))
+							self.y_pos += 20
+							option_ex.place(x = 100, y = self.y_pos)
+					elif temp == 3:
 						for x in self.list_D:
-							option_ex = Label(gui, text = x, font = ("ariel",14))
-							y_pos += 20
-							option_ex.place(x = 100, y = y_pos)
-				temp += 1
+							option_ex = Label(gui, text = x, font = ("ariel",12))
+							self.y_pos += 20
+							option_ex.place(x = 100, y = self.y_pos)
 			# incrementing the y-axis position by 40
-			y_pos += 40
-		
+			self.y_pos += 40
+			temp += 1
 		# return the radio buttons
 		return q_list
 
@@ -285,17 +286,17 @@ class Quiz:
 gui = Tk()
 
 # set the size of the GUI Window
-gui.geometry("800x450")
-gui.minsize(800, 450)
-gui.maxsize(800, 450)
+gui.geometry("800x550")
+gui.minsize(800, 550)
+gui.maxsize(800, 550)
 
 # set the title of the Window
 gui.title("TEST")
 
-# get the data from the json file
+# get the data from the excel file
 data = pd.read_excel("data.xlsx")
+
 r = randint(0,197)
-r = 30
 data = data.loc[r]
 # set the question, options, and answer
 
