@@ -305,6 +305,7 @@ data = pd.read_excel("data.xlsx")
 
 # set the question, options, and answer
 r = randint(0, 197)
+r = 12
 data = data.loc[r]
 
 question = [(data['question'])]
