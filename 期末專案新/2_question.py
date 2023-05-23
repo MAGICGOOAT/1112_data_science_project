@@ -9,6 +9,7 @@ import textwrap as tw
 from tkinter import messagebox as mb
 
 import pandas as pd
+import re
 
 #class to define the components of the GUI
 class Quiz:
@@ -70,6 +71,33 @@ class Quiz:
 		self.label_list = []
 		self.q_list = []
   
+	def Organize_line(self, line, width):
+		total_length = 0
+		for i in line:
+			if re.search(u'[\u4e00-\u9fff]', i):
+				total_length += 2
+			else:
+				total_length += 1
+				
+		avg = int(total_length/width)+1
+		list = [''] * avg
+		list_size = [width] * avg
+		current_line = 0
+		for i in line:
+
+			if re.search(u'[\u4e00-\u9fff]', i):
+				list[current_line] += i
+				list_size[current_line] -= 2
+			else:
+				list[current_line] += i
+				list_size[current_line] -= 1
+				
+			if list_size[current_line] <= 0:
+				current_line += 1
+
+		return list
+		
+			
 	
 	# This method is used to display the result
 	# It counts the number of correct and wrong answers
@@ -150,7 +178,7 @@ class Quiz:
 		width=10,bg="blue",fg="white",font=("ariel",16,"bold"))
 		
 		# placing the button on the screen
-		next_button.place(x=350,y=450)
+		next_button.place(x=350,y=460)
 		
 		# This is the second button which is used to Quit the GUI
 		quit_button = Button(gui, text="Quit", command=gui.destroy,
@@ -173,10 +201,10 @@ class Quiz:
 		list2.reverse()
 	
 	def check_line(self):
-		A = tw.wrap(options_A[self.q_no], width = 35)
-		B = tw.wrap(options_B[self.q_no], width = 35)
-		C = tw.wrap(options_C[self.q_no], width = 35)
-		D = tw.wrap(options_D[self.q_no], width = 35)
+		A = self.Organize_line(options_A[self.q_no], 80)
+		B = self.Organize_line(options_B[self.q_no], 80)
+		C = self.Organize_line(options_C[self.q_no], 80)
+		D = self.Organize_line(options_D[self.q_no], 80)
 		if len(A) > 1:
 			self.need_more_line[0] = True
 			self.add_line(A, self.list_A)
@@ -199,10 +227,10 @@ class Quiz:
 		# looping over the options to be displayed for the
 		# text of the radio buttons.
 		# for a, b, c, d in options_A[self.q_no], options_B[self.q_no], options_C[self.q_no], options_D[self.q_no]:
-		A = tw.wrap(options_A[self.q_no], width = 35, break_on_hyphens=False)
-		B = tw.wrap(options_B[self.q_no], width = 35, break_on_hyphens=False)
-		C = tw.wrap(options_C[self.q_no], width = 35, break_on_hyphens=False)
-		D = tw.wrap(options_D[self.q_no], width = 35, break_on_hyphens=False)
+		A = self.Organize_line(options_A[self.q_no], 80)
+		B = self.Organize_line(options_B[self.q_no], 80)
+		C = self.Organize_line(options_C[self.q_no], 80)
+		D = self.Organize_line(options_D[self.q_no], 80)
 		self.opts[val]['text']= A[0]
 		self.opts[val+1]['text']= B[0]
 		self.opts[val+2]['text']= C[0]
@@ -214,14 +242,21 @@ class Quiz:
 	def display_question(self):
   
 		# setting the Question properties
-		q = tw.wrap(question[self.q_no], width = 33, break_on_hyphens=False)
-		for temp_text in q:
-			q_no = Label(gui, text=temp_text, font=( 'ariel' ,14, 'bold' ))
+		q = self.Organize_line(question[self.q_no], 60)
+		if len(q) > 1:
+			for temp_text in q:
+				q_no = Label(gui, text=temp_text, font=( 'ariel' ,14, 'bold' ))
+				#placing the option on the screen
+				self.label_list.append(q_no)
+				q_no.place(x=60, y=self.y_pos)
+				self.y_pos += 25
 			#placing the option on the screen
+		else:
+			q_no = Label(gui, text=q[0], font=( 'ariel' ,14, 'bold' ))
+				#placing the option on the screen
 			self.label_list.append(q_no)
 			q_no.place(x=60, y=self.y_pos)
 			self.y_pos += 25
-		#placing the option on the screen
 		
 
 
@@ -260,6 +295,7 @@ class Quiz:
 			if temp < 4:
 				if self.need_more_line[temp] == True:
 					if temp == 0:
+						
 						for x in self.list_A:
 							option_ex = Label(gui, text = x, font = ("ariel",12))
 							self.label_list.append(option_ex)
@@ -305,7 +341,6 @@ data = pd.read_excel("data.xlsx")
 
 # set the question, options, and answer
 r = randint(0, 197)
-r = 12
 data = data.loc[r]
 
 question = [(data['question'])]
